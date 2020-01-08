@@ -1,20 +1,22 @@
-# dnspod-go
+# DNSPod Go API client
+
+[![Build Status](https://travis-ci.com/nrdcg/dnspod-go.svg?branch=master)](https://travis-ci.com/nrdcg/dnspod-go)
+[![GoDoc](https://godoc.org/github.com/nrdcg/dnspod-go?status.svg)](https://godoc.org/github.com/nrdcg/dnspod-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nrdcg/dnspod-go)](https://goreportcard.com/report/github.com/nrdcg/dnspod-go)
 
 A Go client for the [DNSPod API](https://www.dnspod.cn/docs/index.html).
 
-Borrowed from : [dnsimple](https://github.com/weppos/dnsimple-go/dnsimple)
+Borrowed from: [dnsimple](https://github.com/weppos/dnsimple-go/dnsimple)
 
 ## Installation
 
+```console
+$ go get github.com/nrdcg/dnspod-go
 ```
-$ go get github.com/decker502/dnspod-go
-```
-
 
 ## Getting Started
 
-This library is a Go client you can use to interact with the [DNSPod API](https://www.dnspod.cn/docs/index.html). Here are some examples.
-
+This library is a Go client you can use to interact with the [DNSPod API](https://www.dnspod.cn/docs/index.html).
 
 ```go
 package main
@@ -23,7 +25,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/decker502/dnspod-go"
+	"github.com/nrdcg/dnspod-go"
 )
 
 func main() {
@@ -39,9 +41,9 @@ func main() {
 	}
 
 	// Get a list of your domains (with error management)
-	domains, _, error := client.Domains.List()
-	if error != nil {
-		log.Fatalln(error)
+	domains, _, err := client.Domains.List()
+	if err != nil {
+		log.Fatalln(err)
 	}
 	for _, domain := range domains {
 		fmt.Printf("Domain: %s (id: %d)\n", domain.Name, domain.ID)
@@ -54,6 +56,7 @@ func main() {
 }
 
 ```
+
 ## License
 
 This is Free Software distributed under the MIT license.
