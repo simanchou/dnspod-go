@@ -16,17 +16,18 @@ import (
 )
 
 const (
-	libraryVersion = "0.1"
+	libraryVersion = "1.0"
 	baseURL        = "https://dnsapi.cn/"
 	userAgent      = "dnspod-go/" + libraryVersion
 
-	apiVersion = "v1"
-	timeout    = 5
-	keepAlive  = 30
+	// apiVersion       = "v1"
+	defaultTimeout   = 5
+	defaultKeepAlive = 30
 )
 
 // dnspod API docs: https://www.dnspod.cn/docs/info.html
 
+// CommonParams is the commons parameters.
 type CommonParams struct {
 	LoginToken   string
 	Format       string
@@ -59,15 +60,17 @@ func newPayLoad(params CommonParams) url.Values {
 	return p
 }
 
+// Status is the status representation.
 type Status struct {
 	Code      string `json:"code,omitempty"`
 	Message   string `json:"message,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
+// Client is the DNSPod client.
 type Client struct {
 	// HTTP client used to communicate with the API.
-	HttpClient *http.Client
+	HTTPClient *http.Client
 
 	// CommonParams used communicating with the dnspod API.
 	CommonParams CommonParams
@@ -85,65 +88,52 @@ type Client struct {
 }
 
 // NewClient returns a new dnspod API client.
-func NewClient(CommonParams CommonParams) *Client {
-	var _timeout, _keepalive int
-	_timeout = timeout
-	_keepalive = keepAlive
-
-	if CommonParams.Timeout != 0 {
-		_timeout = CommonParams.Timeout
+func NewClient(commonParams CommonParams) *Client {
+	timeout := defaultTimeout
+	if commonParams.Timeout != 0 {
+		timeout = commonParams.Timeout
 	}
-	if CommonParams.KeepAlive != 0 {
-		_keepalive = CommonParams.KeepAlive
+
+	keepalive := defaultKeepAlive
+	if commonParams.KeepAlive != 0 {
+		keepalive = commonParams.KeepAlive
 	}
 
 	cli := http.Client{
 		Transport: &http.Transport{
-			Dial: (&net.Dialer{
-				Timeout:   time.Duration(_timeout) * time.Second,
-				KeepAlive: time.Duration(_keepalive) * time.Second,
-			}).Dial,
+			DialContext: (&net.Dialer{
+				Timeout:   time.Duration(timeout) * time.Second,
+				KeepAlive: time.Duration(keepalive) * time.Second,
+			}).DialContext,
 		},
 	}
 
-	c := &Client{HttpClient: &cli, CommonParams: CommonParams, BaseURL: baseURL, UserAgent: userAgent}
-	c.Domains = &DomainsService{client: c}
-	return c
+	client := &Client{HTTPClient: &cli, CommonParams: commonParams, BaseURL: baseURL, UserAgent: userAgent}
+	client.Domains = &DomainsService{client: client}
 
+	return client
 }
 
 // NewRequest creates an API request.
 // The path is expected to be a relative path and will be resolved
 // according to the BaseURL of the Client. Paths should always be specified without a preceding slash.
-func (client *Client) NewRequest(method, path string, payload url.Values) (*http.Request, error) {
-	url := client.BaseURL + fmt.Sprintf("%s", path)
+func (c *Client) NewRequest(method, path string, payload url.Values) (*http.Request, error) {
+	uri := c.BaseURL + path
 
-	req, err := http.NewRequest(method, url, strings.NewReader(payload.Encode()))
+	req, err := http.NewRequest(method, uri, strings.NewReader(payload.Encode()))
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("User-Agent", client.UserAgent)
+	req.Header.Add("User-Agent", c.UserAgent)
 
 	return req, nil
 }
 
-func (c *Client) get(path string, v interface{}) (*Response, error) {
-	return c.Do("GET", path, nil, v)
-}
-
 func (c *Client) post(path string, payload url.Values, v interface{}) (*Response, error) {
-	return c.Do("POST", path, payload, v)
-}
-
-func (c *Client) put(path string, payload url.Values, v interface{}) (*Response, error) {
-	return c.Do("PUT", path, payload, v)
-}
-
-func (c *Client) delete(path string, payload url.Values) (*Response, error) {
-	return c.Do("DELETE", path, payload, nil)
+	return c.Do(http.MethodPost, path, payload, v)
 }
 
 // Do sends an API request and returns the API response.
@@ -157,19 +147,21 @@ func (c *Client) Do(method, path string, payload url.Values, v interface{}) (*Re
 		return nil, err
 	}
 
-	res, err := c.HttpClient.Do(req)
+	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
+
 	response := &Response{Response: res}
 	err = CheckResponse(res)
 	if err != nil {
 		return response, err
 	}
+
 	if v != nil {
 		if w, ok := v.(io.Writer); ok {
-			io.Copy(w, res.Body)
+			_, err = io.Copy(w, res.Body)
 		} else {
 			err = json.NewDecoder(res.Body).Decode(v)
 		}
@@ -222,12 +214,15 @@ type Date struct {
 func (d *Date) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
-		return fmt.Errorf("date should be a string, got %s", data)
+		return fmt.Errorf("date should be a string, got %s: %w", data, err)
 	}
+
 	t, err := time.Parse("2006-01-02", s)
 	if err != nil {
-		return fmt.Errorf("invalid date: %v", err)
+		return fmt.Errorf("invalid date: %w", err)
 	}
+
 	d.Time = t
+
 	return nil
 }

@@ -15,6 +15,7 @@ type DomainsService struct {
 	client *Client
 }
 
+// DomainInfo handles domain information.
 type DomainInfo struct {
 	DomainTotal   int    `json:"domain_total,omitempty"`
 	AllTotal      int    `json:"all_total,omitempty"`
@@ -30,6 +31,7 @@ type DomainInfo struct {
 	ShareOutTotal int    `json:"share_out_total,omitempty"`
 }
 
+// Domain handles domain.
 type Domain struct {
 	ID               json.Number `json:"id,omitempty"`
 	Name             string      `json:"name,omitempty"`
@@ -65,12 +67,6 @@ type domainWrapper struct {
 	Domain Domain     `json:"domain"`
 }
 
-// domainRequest represents a generic wrapper for a domain request,
-// when domainWrapper cannot be used because of type constraint on Domain.
-type domainRequest struct {
-	Domain interface{} `json:"domain"`
-}
-
 // domainAction generates the resource path for given domain.
 func domainAction(action string) string {
 	if len(action) > 0 {
@@ -84,25 +80,20 @@ func domainAction(action string) string {
 // dnspod API docs: https://www.dnspod.cn/docs/domains.html#domain-list
 func (s *DomainsService) List() ([]Domain, *Response, error) {
 	path := domainAction("List")
+	payload := newPayLoad(s.client.CommonParams)
+
 	returnedDomains := domainListWrapper{}
 
-	payload := newPayLoad(s.client.CommonParams)
 	res, err := s.client.post(path, payload, &returnedDomains)
 	if err != nil {
-		return []Domain{}, res, err
+		return nil, res, err
 	}
-
-	domains := []Domain{}
 
 	if returnedDomains.Status.Code != "1" {
-		return domains, nil, fmt.Errorf("Could not get domains: %s", returnedDomains.Status.Message)
+		return nil, nil, fmt.Errorf("could not get domains: %s", returnedDomains.Status.Message)
 	}
 
-	for _, domain := range returnedDomains.Domains {
-		domains = append(domains, domain)
-	}
-
-	return domains, res, nil
+	return returnedDomains.Domains, res, nil
 }
 
 // Create a new domain.
@@ -110,12 +101,13 @@ func (s *DomainsService) List() ([]Domain, *Response, error) {
 // dnspod API docs: https://www.dnspod.cn/docs/domains.html#domain-create
 func (s *DomainsService) Create(domainAttributes Domain) (Domain, *Response, error) {
 	path := domainAction("Create")
-	returnedDomain := domainWrapper{}
 
 	payload := newPayLoad(s.client.CommonParams)
 	payload.Set("domain", domainAttributes.Name)
 	payload.Set("group_id", domainAttributes.GroupID.String())
 	payload.Set("is_mark", domainAttributes.IsMark)
+
+	returnedDomain := domainWrapper{}
 
 	res, err := s.client.post(path, payload, &returnedDomain)
 	if err != nil {
@@ -128,12 +120,13 @@ func (s *DomainsService) Create(domainAttributes Domain) (Domain, *Response, err
 // Get fetches a domain.
 //
 // dnspod API docs: https://www.dnspod.cn/docs/domains.html#domain-info
-func (s *DomainsService) Get(ID int) (Domain, *Response, error) {
+func (s *DomainsService) Get(id int) (Domain, *Response, error) {
 	path := domainAction("Info")
-	returnedDomain := domainWrapper{}
 
 	payload := newPayLoad(s.client.CommonParams)
-	payload.Set("domain_id", strconv.FormatInt(int64(ID), 10))
+	payload.Set("domain_id", strconv.FormatInt(int64(id), 10))
+
+	returnedDomain := domainWrapper{}
 
 	res, err := s.client.post(path, payload, &returnedDomain)
 	if err != nil {
@@ -146,17 +139,13 @@ func (s *DomainsService) Get(ID int) (Domain, *Response, error) {
 // Delete a domain.
 //
 // dnspod API docs: https://dnsapi.cn/Domain.Remove
-func (s *DomainsService) Delete(ID int) (*Response, error) {
+func (s *DomainsService) Delete(id int) (*Response, error) {
 	path := domainAction("Remove")
-	returnedDomain := domainWrapper{}
 
 	payload := newPayLoad(s.client.CommonParams)
-	payload.Set("domain_id", strconv.FormatInt(int64(ID), 10))
+	payload.Set("domain_id", strconv.FormatInt(int64(id), 10))
 
-	res, err := s.client.post(path, payload, &returnedDomain)
-	if err != nil {
-		return res, err
-	}
+	returnedDomain := domainWrapper{}
 
-	return res, nil
+	return s.client.post(path, payload, &returnedDomain)
 }

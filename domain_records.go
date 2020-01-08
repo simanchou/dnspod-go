@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// Record is the DNS record representation.
 type Record struct {
 	ID            string `json:"id,omitempty"`
 	Name          string `json:"name,omitempty"`
@@ -41,16 +42,14 @@ func recordAction(action string) string {
 	return "Record.List"
 }
 
-// List the domain records.
+// ListRecords List the domain records.
 //
 // dnspod API docs: https://www.dnspod.cn/docs/records.html#record-list
 func (s *DomainsService) ListRecords(domainID string, recordName string) ([]Record, *Response, error) {
 	path := recordAction("List")
 
 	payload := newPayLoad(s.client.CommonParams)
-
 	payload.Add("domain_id", domainID)
-
 	if recordName != "" {
 		payload.Add("sub_domain", recordName)
 	}
@@ -59,19 +58,14 @@ func (s *DomainsService) ListRecords(domainID string, recordName string) ([]Reco
 
 	res, err := s.client.post(path, payload, &wrappedRecords)
 	if err != nil {
-		return []Record{}, res, err
+		return nil, res, err
 	}
 
 	if wrappedRecords.Status.Code != "1" {
-		return wrappedRecords.Records, nil, fmt.Errorf("Could not get domains: %s", wrappedRecords.Status.Message)
+		return nil, nil, fmt.Errorf("could not get domains: %s", wrappedRecords.Status.Message)
 	}
 
-	records := []Record{}
-	for _, record := range wrappedRecords.Records {
-		records = append(records, record)
-	}
-
-	return records, res, nil
+	return wrappedRecords.Records, res, nil
 }
 
 // CreateRecord creates a domain record.
@@ -81,7 +75,6 @@ func (s *DomainsService) CreateRecord(domain string, recordAttributes Record) (R
 	path := recordAction("Create")
 
 	payload := newPayLoad(s.client.CommonParams)
-
 	payload.Add("domain_id", domain)
 
 	if recordAttributes.Name != "" {
@@ -124,7 +117,7 @@ func (s *DomainsService) CreateRecord(domain string, recordAttributes Record) (R
 	}
 
 	if returnedRecord.Status.Code != "1" {
-		return returnedRecord.Record, nil, fmt.Errorf("Could not get domains: %s", returnedRecord.Status.Message)
+		return returnedRecord.Record, nil, fmt.Errorf("could not get domains: %s", returnedRecord.Status.Message)
 	}
 
 	return returnedRecord.Record, res, nil
@@ -149,7 +142,7 @@ func (s *DomainsService) GetRecord(domain string, recordID string) (Record, *Res
 	}
 
 	if returnedRecord.Status.Code != "1" {
-		return returnedRecord.Record, nil, fmt.Errorf("Could not get domains: %s", returnedRecord.Status.Message)
+		return returnedRecord.Record, nil, fmt.Errorf("could not get domains: %s", returnedRecord.Status.Message)
 	}
 
 	return returnedRecord.Record, res, nil
@@ -205,7 +198,7 @@ func (s *DomainsService) UpdateRecord(domain string, recordID string, recordAttr
 	}
 
 	if returnedRecord.Status.Code != "1" {
-		return returnedRecord.Record, nil, fmt.Errorf("Could not get domains: %s", returnedRecord.Status.Message)
+		return returnedRecord.Record, nil, fmt.Errorf("could not get domains: %s", returnedRecord.Status.Message)
 	}
 
 	return returnedRecord.Record, res, nil
@@ -230,7 +223,7 @@ func (s *DomainsService) DeleteRecord(domain string, recordID string) (*Response
 	}
 
 	if returnedRecord.Status.Code != "1" {
-		return nil, fmt.Errorf("Could not get domains: %s", returnedRecord.Status.Message)
+		return nil, fmt.Errorf("could not get domains: %s", returnedRecord.Status.Message)
 	}
 
 	return res, nil

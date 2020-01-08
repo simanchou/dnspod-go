@@ -8,29 +8,39 @@ import (
 )
 
 func TestDomains_domainAction(t *testing.T) {
-	var pathTests = []struct {
-		input    string
+	testCases := []struct {
+		action   string
 		expected string
 	}{
-		{"Create", "Domain.Create"},
-		{"", "Domain.List"},
+		{
+			action:   "Create",
+			expected: "Domain.Create",
+		},
+		{
+			expected: "Domain.List",
+		},
 	}
 
-	for _, pt := range pathTests {
-		actual := domainAction(pt.input)
-		if actual != pt.expected {
-			t.Errorf("domainAction(%+v): expected %s, actual %s", pt.input, pt.expected, actual)
+	for _, test := range testCases {
+		actual := domainAction(test.action)
+
+		if actual != test.expected {
+			t.Errorf("domainAction(%+v): expected %s, actual %s", test.action, test.expected, actual)
 		}
 	}
 }
 
 func TestDomainsService_List(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Domain.List", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-		fmt.Fprint(w, `{
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
+
+		_, _ = fmt.Fprint(w, `{
 			"status": {"code":"1","message":""},
 			"domains": [
 				{
@@ -59,12 +69,16 @@ func TestDomainsService_List(t *testing.T) {
 }
 
 func TestDomainsService_List_Ambiguous_Value(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Domain.List", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-		fmt.Fprint(w, `{
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
+
+		_, _ = fmt.Fprint(w, `{
 			"status": {"code":"1","message":""},
 			"domains": [
 				{
@@ -93,25 +107,24 @@ func TestDomainsService_List_Ambiguous_Value(t *testing.T) {
 }
 
 func TestDomainsService_Create(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Domain.Create", func(w http.ResponseWriter, r *http.Request) {
-		want := make(map[string]interface{})
-		want["domain"] = map[string]interface{}{"name": "example.com"}
-
-		testMethod(t, r, "POST")
-		// testRequestJSON(t, r, want)
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
 
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, `{"status": {"code":"1","message":""},"domain":{"id":1, "name":"example.com"}}`)
+		_, _ = fmt.Fprintf(w, `{"status": {"code":"1","message":""},"domain":{"id":1, "name":"example.com"}}`)
 	})
 
 	domainValues := Domain{Name: "example.com"}
 	domain, _, err := client.Domains.Create(domainValues)
 
 	if err != nil {
-		t.Errorf("Domains.Create returned error: %v", err)
+		t.Fatalf("Domains.Create returned error: %v", err)
 	}
 
 	want := Domain{ID: "1", Name: "example.com"}
@@ -121,13 +134,16 @@ func TestDomainsService_Create(t *testing.T) {
 }
 
 func TestDomainsService_Get(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Domain.Info", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
 
-		fmt.Fprint(w, `{"status": {"code":"1","message":""},"domain": {"id":1, "name":"example.com"}}`)
+		_, _ = fmt.Fprint(w, `{"status": {"code":"1","message":""},"domain": {"id":1, "name":"example.com"}}`)
 	})
 
 	domain, _, err := client.Domains.Get(1)
@@ -143,12 +159,16 @@ func TestDomainsService_Get(t *testing.T) {
 }
 
 func TestDomainsService_Delete(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Domain.Remove", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-		fmt.Fprint(w, `{"status": {"code":"1","message":""}}`)
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
+
+		_, _ = fmt.Fprint(w, `{"status": {"code":"1","message":""}}`)
 	})
 
 	_, err := client.Domains.Delete(1)

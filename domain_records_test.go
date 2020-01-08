@@ -9,29 +9,38 @@ import (
 )
 
 func TestRecords_recordPath(t *testing.T) {
-	var pathTest = []struct {
-		actionInput string
-		expected    string
+	testCases := []struct {
+		action   string
+		expected string
 	}{
-		{"List", "Record.List"},
-		{"", "Record.List"},
+		{
+			action:   "List",
+			expected: "Record.List",
+		},
+		{
+			expected: "Record.List",
+		},
 	}
 
-	for _, pt := range pathTest {
-		actual := recordAction(pt.actionInput)
-		if actual != pt.expected {
-			t.Errorf("recordPath(%+v): expected %s, actual %s", pt.actionInput, pt.expected, actual)
+	for _, test := range testCases {
+		actual := recordAction(test.action)
+		if actual != test.expected {
+			t.Errorf("recordPath(%+v): expected %s, actual %s", test.action, test.expected, actual)
 		}
 	}
 }
 
 func TestDomainsService_ListRecords_all(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Record.List", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-		fmt.Fprint(w, `{
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
+
+		_, _ = fmt.Fprint(w, `{
 			"status": {"code":"1","message":""},
 			"records":[
 				{"id":"44146112", "name":"yizerowwwww"},
@@ -52,12 +61,16 @@ func TestDomainsService_ListRecords_all(t *testing.T) {
 }
 
 func TestDomainsService_ListRecords_subdomain(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Record.List", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-		fmt.Fprint(w, `{
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
+
+		_, _ = fmt.Fprint(w, `{
 			"status": {"code":"1","message":""},
 			"records":[
 				{"id":"44146112", "name":"yizerowwwww"},
@@ -78,18 +91,17 @@ func TestDomainsService_ListRecords_subdomain(t *testing.T) {
 }
 
 func TestDomainsService_CreateRecord(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Record.Create", func(w http.ResponseWriter, r *http.Request) {
-		// want := make(map[string]interface{})
-		// want["record"] = map[string]interface{}{"name": "foo", "content": "192.168.0.10", "record_type": "A"}
-
-		testMethod(t, r, "POST")
-		// testRequestJSON(t, r, want)
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
 
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, `{"status": {"code":"1","message":""},"record":{"id":"26954449", "name":"@", "status":"enable"}}`)
+		_, _ = fmt.Fprintf(w, `{"status": {"code":"1","message":""},"record":{"id":"26954449", "name":"@", "status":"enable"}}`)
 	})
 
 	recordValues := Record{Name: "@", Status: "enable"}
@@ -106,18 +118,22 @@ func TestDomainsService_CreateRecord(t *testing.T) {
 }
 
 func TestDomainsService_GetRecord(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Record.Info", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-		fmt.Fprintf(w, `{"status": {"code":"1","message":""},"record":{"id":"26954449", "name":"@", "status":"enable"}}`)
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
+
+		_, _ = fmt.Fprintf(w, `{"status": {"code":"1","message":""},"record":{"id":"26954449", "name":"@", "status":"enable"}}`)
 	})
 
 	record, _, err := client.Domains.GetRecord("44146112", "26954449")
 
 	if err != nil {
-		t.Errorf("Domains.GetRecord returned error: %v", err)
+		t.Fatalf("Domains.GetRecord returned error: %v", err)
 	}
 
 	want := Record{ID: "26954449", Name: "@", Status: "enable"}
@@ -127,17 +143,16 @@ func TestDomainsService_GetRecord(t *testing.T) {
 }
 
 func TestDomainsService_UpdateRecord(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Record.Modify", func(w http.ResponseWriter, r *http.Request) {
-		// want := make(map[string]interface{})
-		// want["record"] = map[string]interface{}{"content": "192.168.0.10", "name": "bar"}
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
 
-		testMethod(t, r, "POST")
-		// testRequestJSON(t, r, want)
-
-		fmt.Fprint(w, `{"status": {"code":"1","message":""},"record":{"id":"26954449", "name":"@", "status":"enable"}}`)
+		_, _ = fmt.Fprint(w, `{"status": {"code":"1","message":""},"record":{"id":"26954449", "name":"@", "status":"enable"}}`)
 	})
 
 	recordValues := Record{ID: "26954449", Name: "@", Status: "enable"}
@@ -154,35 +169,41 @@ func TestDomainsService_UpdateRecord(t *testing.T) {
 }
 
 func TestDomainsService_DeleteRecord(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Record.Remove", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
-		fmt.Fprint(w, `{"status": {"code":"1","message":""}}`)
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
+
+		_, _ = fmt.Fprint(w, `{"status": {"code":"1","message":""}}`)
 	})
 
 	_, err := client.Domains.DeleteRecord("44146112", "26954449")
-
 	if err != nil {
 		t.Errorf("Domains.DeleteRecord returned error: %v", err)
 	}
 }
 
 func TestDomainsService_DeleteRecord_failed(t *testing.T) {
-	setup()
+	client, mux, teardown := setupClient()
 	defer teardown()
 
 	mux.HandleFunc("/Record.Remove", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "POST")
+		if r.Method != http.MethodPost {
+			http.Error(w, "unsupported method", http.StatusBadRequest)
+			return
+		}
 
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, `{"message":"InvalID request"}`)
+		_, _ = fmt.Fprint(w, `{"message":"InvalID request"}`)
 	})
 
 	_, err := client.Domains.DeleteRecord("44146112", "26954449")
 	if err == nil {
-		t.Errorf("Domains.DeleteRecord expected error to be returned")
+		t.Fatal("Domains.DeleteRecord expected error to be returned")
 	}
 
 	if match := "400 InvalID request"; !strings.Contains(err.Error(), match) {
