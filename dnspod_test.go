@@ -25,8 +25,8 @@ func TestNewClient(t *testing.T) {
 
 	client := NewClient(params)
 
-	if client.BaseURL != baseURL {
-		t.Errorf("NewClient BaseURL = %v, want %v", client.BaseURL, baseURL)
+	if client.BaseURL != defaultBaseURL {
+		t.Errorf("got %v, want %v", client.BaseURL, defaultBaseURL)
 	}
 }
 

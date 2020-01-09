@@ -4,6 +4,14 @@ import (
 	"fmt"
 )
 
+const (
+	methodRecordList   = "Record.List"
+	methodRecordCreate = "Record.Create"
+	methodRecordInfo   = "Record.Info"
+	methodRecordRemove = "Record.Remove"
+	methodRecordModify = "Record.Modify"
+)
+
 // Record is the DNS record representation.
 type Record struct {
 	ID            string `json:"id,omitempty"`
@@ -34,20 +42,17 @@ type recordWrapper struct {
 	Record Record     `json:"record"`
 }
 
-// recordAction generates the resource path for given record that belongs to a domain.
-func recordAction(action string) string {
-	if len(action) > 0 {
-		return fmt.Sprintf("Record.%s", action)
-	}
-	return "Record.List"
+// RecordsService handles communication with the DNS records related methods of the dnspod API.
+//
+// dnspod API docs: https://www.dnspod.cn/docs/records.html
+type RecordsService struct {
+	client *Client
 }
 
-// ListRecords List the domain records.
+// List List the domain records.
 //
 // dnspod API docs: https://www.dnspod.cn/docs/records.html#record-list
-func (s *DomainsService) ListRecords(domainID string, recordName string) ([]Record, *Response, error) {
-	path := recordAction("List")
-
+func (s *RecordsService) List(domainID string, recordName string) ([]Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domainID)
 	if recordName != "" {
@@ -56,7 +61,7 @@ func (s *DomainsService) ListRecords(domainID string, recordName string) ([]Reco
 
 	wrappedRecords := recordsWrapper{}
 
-	res, err := s.client.post(path, payload, &wrappedRecords)
+	res, err := s.client.post(methodRecordList, payload, &wrappedRecords)
 	if err != nil {
 		return nil, res, err
 	}
@@ -68,12 +73,10 @@ func (s *DomainsService) ListRecords(domainID string, recordName string) ([]Reco
 	return wrappedRecords.Records, res, nil
 }
 
-// CreateRecord creates a domain record.
+// Create Creates a domain record.
 //
 // dnspod API docs: https://www.dnspod.cn/docs/records.html#record-create
-func (s *DomainsService) CreateRecord(domain string, recordAttributes Record) (Record, *Response, error) {
-	path := recordAction("Create")
-
+func (s *RecordsService) Create(domain string, recordAttributes Record) (Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
 
@@ -111,7 +114,7 @@ func (s *DomainsService) CreateRecord(domain string, recordAttributes Record) (R
 
 	returnedRecord := recordWrapper{}
 
-	res, err := s.client.post(path, payload, &returnedRecord)
+	res, err := s.client.post(methodRecordCreate, payload, &returnedRecord)
 	if err != nil {
 		return Record{}, res, err
 	}
@@ -123,20 +126,17 @@ func (s *DomainsService) CreateRecord(domain string, recordAttributes Record) (R
 	return returnedRecord.Record, res, nil
 }
 
-// GetRecord fetches the domain record.
+// Get Fetches the domain record.
 //
 // dnspod API docs: https://www.dnspod.cn/docs/records.html#record-info
-func (s *DomainsService) GetRecord(domain string, recordID string) (Record, *Response, error) {
-	path := recordAction("Info")
-
+func (s *RecordsService) Get(domain string, recordID string) (Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
-
 	payload.Add("domain_id", domain)
 	payload.Add("record_id", recordID)
 
 	returnedRecord := recordWrapper{}
 
-	res, err := s.client.post(path, payload, &returnedRecord)
+	res, err := s.client.post(methodRecordInfo, payload, &returnedRecord)
 	if err != nil {
 		return Record{}, res, err
 	}
@@ -148,14 +148,11 @@ func (s *DomainsService) GetRecord(domain string, recordID string) (Record, *Res
 	return returnedRecord.Record, res, nil
 }
 
-// UpdateRecord updates a domain record.
+// Update Updates a domain record.
 //
 // dnspod API docs: https://www.dnspod.cn/docs/records.html#record-modify
-func (s *DomainsService) UpdateRecord(domain string, recordID string, recordAttributes Record) (Record, *Response, error) {
-	path := recordAction("Modify")
-
+func (s *RecordsService) Update(domain string, recordID string, recordAttributes Record) (Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
-
 	payload.Add("domain_id", domain)
 
 	if recordAttributes.Name != "" {
@@ -192,7 +189,7 @@ func (s *DomainsService) UpdateRecord(domain string, recordID string, recordAttr
 
 	returnedRecord := recordWrapper{}
 
-	res, err := s.client.post(path, payload, &returnedRecord)
+	res, err := s.client.post(methodRecordModify, payload, &returnedRecord)
 	if err != nil {
 		return Record{}, res, err
 	}
@@ -204,20 +201,17 @@ func (s *DomainsService) UpdateRecord(domain string, recordID string, recordAttr
 	return returnedRecord.Record, res, nil
 }
 
-// DeleteRecord deletes a domain record.
+// Delete Deletes a domain record.
 //
 // dnspod API docs: https://www.dnspod.cn/docs/records.html#record-remove
-func (s *DomainsService) DeleteRecord(domain string, recordID string) (*Response, error) {
-	path := recordAction("Remove")
-
+func (s *RecordsService) Delete(domain string, recordID string) (*Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
-
 	payload.Add("domain_id", domain)
 	payload.Add("record_id", recordID)
 
 	returnedRecord := recordWrapper{}
 
-	res, err := s.client.post(path, payload, &returnedRecord)
+	res, err := s.client.post(methodRecordRemove, payload, &returnedRecord)
 	if err != nil {
 		return res, err
 	}

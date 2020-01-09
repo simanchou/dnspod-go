@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	libraryVersion = "0.3"
-	baseURL        = "https://dnsapi.cn/"
-	userAgent      = "dnspod-go/" + libraryVersion
+	libraryVersion   = "0.3"
+	defaultBaseURL   = "https://dnsapi.cn/"
+	defaultUserAgent = "dnspod-go/" + libraryVersion
 
 	// apiVersion       = "v1"
 	defaultTimeout   = 5
@@ -67,6 +67,10 @@ type Status struct {
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
+type service struct {
+	client *Client
+}
+
 // Client is the DNSPod client.
 type Client struct {
 	// HTTP client used to communicate with the API.
@@ -83,20 +87,23 @@ type Client struct {
 	// User agent used when communicating with the dnspod API.
 	UserAgent string
 
+	common service // Reuse a single struct instead of allocating one for each service on the heap.
+
 	// Services used for talking to different parts of the dnspod API.
 	Domains *DomainsService
+	Records *RecordsService
 }
 
 // NewClient returns a new dnspod API client.
-func NewClient(commonParams CommonParams) *Client {
+func NewClient(params CommonParams) *Client {
 	timeout := defaultTimeout
-	if commonParams.Timeout != 0 {
-		timeout = commonParams.Timeout
+	if params.Timeout != 0 {
+		timeout = params.Timeout
 	}
 
 	keepalive := defaultKeepAlive
-	if commonParams.KeepAlive != 0 {
-		keepalive = commonParams.KeepAlive
+	if params.KeepAlive != 0 {
+		keepalive = params.KeepAlive
 	}
 
 	httpClient := http.Client{
@@ -108,8 +115,11 @@ func NewClient(commonParams CommonParams) *Client {
 		},
 	}
 
-	client := &Client{HTTPClient: &httpClient, CommonParams: commonParams, BaseURL: baseURL, UserAgent: userAgent}
-	client.Domains = &DomainsService{client: client}
+	client := &Client{HTTPClient: &httpClient, CommonParams: params, BaseURL: defaultBaseURL, UserAgent: defaultUserAgent}
+
+	client.common.client = client
+	client.Domains = (*DomainsService)(&client.common)
+	client.Records = (*RecordsService)(&client.common)
 
 	return client
 }

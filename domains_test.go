@@ -7,29 +7,6 @@ import (
 	"testing"
 )
 
-func TestDomains_domainAction(t *testing.T) {
-	testCases := []struct {
-		action   string
-		expected string
-	}{
-		{
-			action:   "Create",
-			expected: "Domain.Create",
-		},
-		{
-			expected: "Domain.List",
-		},
-	}
-
-	for _, test := range testCases {
-		actual := domainAction(test.action)
-
-		if actual != test.expected {
-			t.Errorf("domainAction(%+v): expected %s, actual %s", test.action, test.expected, actual)
-		}
-	}
-}
-
 func TestDomainsService_List(t *testing.T) {
 	client, mux, teardown := setupClient()
 	defer teardown()
@@ -57,14 +34,13 @@ func TestDomainsService_List(t *testing.T) {
 	})
 
 	domains, _, err := client.Domains.List()
-
 	if err != nil {
-		t.Errorf("Domains.List returned error: %v", err)
+		t.Fatal(err)
 	}
 
 	want := []Domain{{ID: "2238269", Status: "enable"}, {ID: "10360095", Status: "enable"}}
 	if !reflect.DeepEqual(domains, want) {
-		t.Errorf("Domains.List returned %+v, want %+v", domains, want)
+		t.Errorf("got %+v, want %+v", domains, want)
 	}
 }
 
@@ -95,14 +71,13 @@ func TestDomainsService_List_Ambiguous_Value(t *testing.T) {
 	})
 
 	domains, _, err := client.Domains.List()
-
 	if err != nil {
-		t.Errorf("Domains.List returned error: %v", err)
+		t.Fatal(err)
 	}
 
 	want := []Domain{{ID: "2238269", Status: "enable", GroupID: "9"}, {ID: "10360095", Status: "enable", GroupID: "9"}}
 	if !reflect.DeepEqual(domains, want) {
-		t.Errorf("Domains.List returned %+v, want %+v", domains, want)
+		t.Errorf("got %+v, want %+v", domains, want)
 	}
 }
 
@@ -122,14 +97,13 @@ func TestDomainsService_Create(t *testing.T) {
 
 	domainValues := Domain{Name: "example.com"}
 	domain, _, err := client.Domains.Create(domainValues)
-
 	if err != nil {
-		t.Fatalf("Domains.Create returned error: %v", err)
+		t.Fatal(err)
 	}
 
 	want := Domain{ID: "1", Name: "example.com"}
 	if !reflect.DeepEqual(domain, want) {
-		t.Fatalf("Domains.Create returned %+v, want %+v", domain, want)
+		t.Errorf("got %+v, want %+v", domain, want)
 	}
 }
 
@@ -147,14 +121,13 @@ func TestDomainsService_Get(t *testing.T) {
 	})
 
 	domain, _, err := client.Domains.Get(1)
-
 	if err != nil {
 		t.Errorf("Domains.Get returned error: %v", err)
 	}
 
 	want := Domain{ID: "1", Name: "example.com"}
 	if !reflect.DeepEqual(domain, want) {
-		t.Fatalf("Domains.Get returned %+v, want %+v", domain, want)
+		t.Errorf("got %+v, want %+v", domain, want)
 	}
 }
 
@@ -172,8 +145,7 @@ func TestDomainsService_Delete(t *testing.T) {
 	})
 
 	_, err := client.Domains.Delete(1)
-
 	if err != nil {
-		t.Errorf("Domains.Delete returned error: %v", err)
+		t.Fatal(err)
 	}
 }

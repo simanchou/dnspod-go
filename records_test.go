@@ -8,29 +8,7 @@ import (
 	"testing"
 )
 
-func TestRecords_recordPath(t *testing.T) {
-	testCases := []struct {
-		action   string
-		expected string
-	}{
-		{
-			action:   "List",
-			expected: "Record.List",
-		},
-		{
-			expected: "Record.List",
-		},
-	}
-
-	for _, test := range testCases {
-		actual := recordAction(test.action)
-		if actual != test.expected {
-			t.Errorf("recordPath(%+v): expected %s, actual %s", test.action, test.expected, actual)
-		}
-	}
-}
-
-func TestDomainsService_ListRecords_all(t *testing.T) {
+func TestRecordsService_ListRecords_all(t *testing.T) {
 	client, mux, teardown := setupClient()
 	defer teardown()
 
@@ -48,19 +26,18 @@ func TestDomainsService_ListRecords_all(t *testing.T) {
 			]}`)
 	})
 
-	records, _, err := client.Domains.ListRecords("example.com", "")
-
+	records, _, err := client.Records.List("example.com", "")
 	if err != nil {
-		t.Errorf("Domains.ListRecords returned error: %v", err)
+		t.Fatal(err)
 	}
 
 	want := []Record{{ID: "44146112", Name: "yizerowwwww"}, {ID: "44146112", Name: "yizerowwwww"}}
 	if !reflect.DeepEqual(records, want) {
-		t.Fatalf("Domains.ListRecords returned %+v, want %+v", records, want)
+		t.Errorf("got %+v, want %+v", records, want)
 	}
 }
 
-func TestDomainsService_ListRecords_subdomain(t *testing.T) {
+func TestRecordsService_ListRecords_subdomain(t *testing.T) {
 	client, mux, teardown := setupClient()
 	defer teardown()
 
@@ -78,19 +55,18 @@ func TestDomainsService_ListRecords_subdomain(t *testing.T) {
 			]}`)
 	})
 
-	records, _, err := client.Domains.ListRecords("11223344", "@")
-
+	records, _, err := client.Records.List("11223344", "@")
 	if err != nil {
-		t.Errorf("Domains.ListRecords returned error: %v", err)
+		t.Fatal(err)
 	}
 
 	want := []Record{{ID: "44146112", Name: "yizerowwwww"}, {ID: "44146112", Name: "yizerowwwww"}}
 	if !reflect.DeepEqual(records, want) {
-		t.Fatalf("Domains.ListRecords returned %+v, want %+v", records, want)
+		t.Errorf("got returned %+v, want %+v", records, want)
 	}
 }
 
-func TestDomainsService_CreateRecord(t *testing.T) {
+func TestRecordsService_CreateRecord(t *testing.T) {
 	client, mux, teardown := setupClient()
 	defer teardown()
 
@@ -105,19 +81,18 @@ func TestDomainsService_CreateRecord(t *testing.T) {
 	})
 
 	recordValues := Record{Name: "@", Status: "enable"}
-	record, _, err := client.Domains.CreateRecord("44146112", recordValues)
-
+	record, _, err := client.Records.Create("44146112", recordValues)
 	if err != nil {
-		t.Errorf("Domains.CreateRecord returned error: %v", err)
+		t.Fatal(err)
 	}
 
 	want := Record{ID: "26954449", Name: "@", Status: "enable"}
 	if !reflect.DeepEqual(record, want) {
-		t.Fatalf("Domains.CreateRecord returned %+v, want %+v", record, want)
+		t.Errorf("got %+v, want %+v", record, want)
 	}
 }
 
-func TestDomainsService_GetRecord(t *testing.T) {
+func TestRecordsService_GetRecord(t *testing.T) {
 	client, mux, teardown := setupClient()
 	defer teardown()
 
@@ -130,19 +105,18 @@ func TestDomainsService_GetRecord(t *testing.T) {
 		_, _ = fmt.Fprintf(w, `{"status": {"code":"1","message":""},"record":{"id":"26954449", "name":"@", "status":"enable"}}`)
 	})
 
-	record, _, err := client.Domains.GetRecord("44146112", "26954449")
-
+	record, _, err := client.Records.Get("44146112", "26954449")
 	if err != nil {
-		t.Fatalf("Domains.GetRecord returned error: %v", err)
+		t.Fatal(err)
 	}
 
 	want := Record{ID: "26954449", Name: "@", Status: "enable"}
 	if !reflect.DeepEqual(record, want) {
-		t.Fatalf("Domains.GetRecord returned %+v, want %+v", record, want)
+		t.Fatalf("got %+v, want %+v", record, want)
 	}
 }
 
-func TestDomainsService_UpdateRecord(t *testing.T) {
+func TestRecordsService_UpdateRecord(t *testing.T) {
 	client, mux, teardown := setupClient()
 	defer teardown()
 
@@ -156,19 +130,18 @@ func TestDomainsService_UpdateRecord(t *testing.T) {
 	})
 
 	recordValues := Record{ID: "26954449", Name: "@", Status: "enable"}
-	record, _, err := client.Domains.UpdateRecord("44146112", "26954449", recordValues)
-
+	record, _, err := client.Records.Update("44146112", "26954449", recordValues)
 	if err != nil {
-		t.Errorf("Domains.UpdateRecord returned error: %v", err)
+		t.Fatal(err)
 	}
 
 	want := Record{ID: "26954449", Name: "@", Status: "enable"}
 	if !reflect.DeepEqual(record, want) {
-		t.Fatalf("Domains.UpdateRecord returned %+v, want %+v", record, want)
+		t.Errorf("got %+v, want %+v", record, want)
 	}
 }
 
-func TestDomainsService_DeleteRecord(t *testing.T) {
+func TestRecordsService_DeleteRecord(t *testing.T) {
 	client, mux, teardown := setupClient()
 	defer teardown()
 
@@ -181,13 +154,13 @@ func TestDomainsService_DeleteRecord(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"status": {"code":"1","message":""}}`)
 	})
 
-	_, err := client.Domains.DeleteRecord("44146112", "26954449")
+	_, err := client.Records.Delete("44146112", "26954449")
 	if err != nil {
-		t.Errorf("Domains.DeleteRecord returned error: %v", err)
+		t.Fatal(err)
 	}
 }
 
-func TestDomainsService_DeleteRecord_failed(t *testing.T) {
+func TestRecordsService_DeleteRecord_failed(t *testing.T) {
 	client, mux, teardown := setupClient()
 	defer teardown()
 
@@ -201,12 +174,12 @@ func TestDomainsService_DeleteRecord_failed(t *testing.T) {
 		_, _ = fmt.Fprint(w, `{"message":"InvalID request"}`)
 	})
 
-	_, err := client.Domains.DeleteRecord("44146112", "26954449")
+	_, err := client.Records.Delete("44146112", "26954449")
 	if err == nil {
-		t.Fatal("Domains.DeleteRecord expected error to be returned")
+		t.Fatal(err)
 	}
 
 	if match := "400 InvalID request"; !strings.Contains(err.Error(), match) {
-		t.Errorf("Records.Delete returned %+v, should match %+v", err, match)
+		t.Errorf("got %+v, should match %+v", err, match)
 	}
 }
