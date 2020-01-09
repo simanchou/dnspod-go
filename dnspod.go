@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	libraryVersion   = "0.3"
+	libraryVersion   = "0.4"
 	defaultBaseURL   = "https://dnsapi.cn/"
 	defaultUserAgent = "dnspod-go/" + libraryVersion
 
