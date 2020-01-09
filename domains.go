@@ -124,7 +124,7 @@ func (s *DomainsService) Get(id int) (Domain, *Response, error) {
 	path := domainAction("Info")
 
 	payload := newPayLoad(s.client.CommonParams)
-	payload.Set("domain_id", strconv.FormatInt(int64(id), 10))
+	payload.Set("domain_id", strconv.Itoa(id))
 
 	returnedDomain := domainWrapper{}
 
@@ -143,7 +143,7 @@ func (s *DomainsService) Delete(id int) (*Response, error) {
 	path := domainAction("Remove")
 
 	payload := newPayLoad(s.client.CommonParams)
-	payload.Set("domain_id", strconv.FormatInt(int64(id), 10))
+	payload.Set("domain_id", strconv.Itoa(id))
 
 	returnedDomain := domainWrapper{}
 

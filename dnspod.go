@@ -4,7 +4,6 @@
 package dnspod
 
 import (
-	// "bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,8 +33,9 @@ type CommonParams struct {
 	Lang         string
 	ErrorOnEmpty string
 	UserID       string
-	Timeout      int
-	KeepAlive    int
+
+	Timeout   int
+	KeepAlive int
 }
 
 func newPayLoad(params CommonParams) url.Values {
@@ -99,7 +99,7 @@ func NewClient(commonParams CommonParams) *Client {
 		keepalive = commonParams.KeepAlive
 	}
 
-	cli := http.Client{
+	httpClient := http.Client{
 		Transport: &http.Transport{
 			DialContext: (&net.Dialer{
 				Timeout:   time.Duration(timeout) * time.Second,
@@ -108,7 +108,7 @@ func NewClient(commonParams CommonParams) *Client {
 		},
 	}
 
-	client := &Client{HTTPClient: &cli, CommonParams: commonParams, BaseURL: baseURL, UserAgent: userAgent}
+	client := &Client{HTTPClient: &httpClient, CommonParams: commonParams, BaseURL: baseURL, UserAgent: userAgent}
 	client.Domains = &DomainsService{client: client}
 
 	return client
