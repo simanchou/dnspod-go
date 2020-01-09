@@ -80,7 +80,7 @@ func domainAction(action string) string {
 // dnspod API docs: https://www.dnspod.cn/docs/domains.html#domain-list
 func (s *DomainsService) List() ([]Domain, *Response, error) {
 	path := domainAction("List")
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 
 	returnedDomains := domainListWrapper{}
 
@@ -102,7 +102,7 @@ func (s *DomainsService) List() ([]Domain, *Response, error) {
 func (s *DomainsService) Create(domainAttributes Domain) (Domain, *Response, error) {
 	path := domainAction("Create")
 
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 	payload.Set("domain", domainAttributes.Name)
 	payload.Set("group_id", domainAttributes.GroupID.String())
 	payload.Set("is_mark", domainAttributes.IsMark)
@@ -123,7 +123,7 @@ func (s *DomainsService) Create(domainAttributes Domain) (Domain, *Response, err
 func (s *DomainsService) Get(id int) (Domain, *Response, error) {
 	path := domainAction("Info")
 
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 	payload.Set("domain_id", strconv.Itoa(id))
 
 	returnedDomain := domainWrapper{}
@@ -142,7 +142,7 @@ func (s *DomainsService) Get(id int) (Domain, *Response, error) {
 func (s *DomainsService) Delete(id int) (*Response, error) {
 	path := domainAction("Remove")
 
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 	payload.Set("domain_id", strconv.Itoa(id))
 
 	returnedDomain := domainWrapper{}

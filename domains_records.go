@@ -48,7 +48,7 @@ func recordAction(action string) string {
 func (s *DomainsService) ListRecords(domainID string, recordName string) ([]Record, *Response, error) {
 	path := recordAction("List")
 
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domainID)
 	if recordName != "" {
 		payload.Add("sub_domain", recordName)
@@ -74,7 +74,7 @@ func (s *DomainsService) ListRecords(domainID string, recordName string) ([]Reco
 func (s *DomainsService) CreateRecord(domain string, recordAttributes Record) (Record, *Response, error) {
 	path := recordAction("Create")
 
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
 
 	if recordAttributes.Name != "" {
@@ -129,7 +129,7 @@ func (s *DomainsService) CreateRecord(domain string, recordAttributes Record) (R
 func (s *DomainsService) GetRecord(domain string, recordID string) (Record, *Response, error) {
 	path := recordAction("Info")
 
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 
 	payload.Add("domain_id", domain)
 	payload.Add("record_id", recordID)
@@ -154,7 +154,7 @@ func (s *DomainsService) GetRecord(domain string, recordID string) (Record, *Res
 func (s *DomainsService) UpdateRecord(domain string, recordID string, recordAttributes Record) (Record, *Response, error) {
 	path := recordAction("Modify")
 
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 
 	payload.Add("domain_id", domain)
 
@@ -210,7 +210,7 @@ func (s *DomainsService) UpdateRecord(domain string, recordID string, recordAttr
 func (s *DomainsService) DeleteRecord(domain string, recordID string) (*Response, error) {
 	path := recordAction("Remove")
 
-	payload := newPayLoad(s.client.CommonParams)
+	payload := s.client.CommonParams.toPayLoad()
 
 	payload.Add("domain_id", domain)
 	payload.Add("record_id", recordID)

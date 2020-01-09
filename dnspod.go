@@ -38,23 +38,23 @@ type CommonParams struct {
 	KeepAlive int
 }
 
-func newPayLoad(params CommonParams) url.Values {
+func (c CommonParams) toPayLoad() url.Values {
 	p := url.Values{}
 
-	if params.LoginToken != "" {
-		p.Set("login_token", params.LoginToken)
+	if c.LoginToken != "" {
+		p.Set("login_token", c.LoginToken)
 	}
-	if params.Format != "" {
-		p.Set("format", params.Format)
+	if c.Format != "" {
+		p.Set("format", c.Format)
 	}
-	if params.Lang != "" {
-		p.Set("lang", params.Lang)
+	if c.Lang != "" {
+		p.Set("lang", c.Lang)
 	}
-	if params.ErrorOnEmpty != "" {
-		p.Set("error_on_empty", params.ErrorOnEmpty)
+	if c.ErrorOnEmpty != "" {
+		p.Set("error_on_empty", c.ErrorOnEmpty)
 	}
-	if params.UserID != "" {
-		p.Set("user_id", params.UserID)
+	if c.UserID != "" {
+		p.Set("user_id", c.UserID)
 	}
 
 	return p
