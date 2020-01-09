@@ -6,13 +6,7 @@
 
 A Go client for the [DNSPod API](https://www.dnspod.cn/docs/index.html).
 
-Borrowed from: [dnsimple](https://github.com/weppos/dnsimple-go/dnsimple)
-
-## Installation
-
-```console
-$ go get github.com/nrdcg/dnspod-go
-```
+Originally inspired by [dnsimple](https://github.com/weppos/dnsimple-go/dnsimple)
 
 ## Getting Started
 
@@ -54,7 +48,6 @@ func main() {
 	domain, _, _ := client.Domains.Create(newDomain)
 	fmt.Printf("Domain: %s\n (id: %d)", domain.Name, domain.ID)
 }
-
 ```
 
 ## License
