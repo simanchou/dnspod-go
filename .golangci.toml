@@ -25,14 +25,12 @@
   disable = [
     "maligned",
     "lll",
-    "gas",
     "dupl",
     "prealloc",
     "scopelint",
     "bodyclose",
     "wsl",
     "stylecheck",
-    "godox",
     "gomnd",
   ]
 
