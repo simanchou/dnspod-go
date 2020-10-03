@@ -19,7 +19,6 @@ const (
 	defaultBaseURL   = "https://dnsapi.cn/"
 	defaultUserAgent = "dnspod-go/" + libraryVersion
 
-	// apiVersion       = "v1"
 	defaultTimeout   = 5
 	defaultKeepAlive = 30
 )
