@@ -1,7 +1,7 @@
 # DNSPod Go API client
 
-[![Build Status](https://travis-ci.com/nrdcg/dnspod-go.svg?branch=master)](https://travis-ci.com/nrdcg/dnspod-go)
-[![GoDoc](https://godoc.org/github.com/nrdcg/dnspod-go?status.svg)](https://godoc.org/github.com/nrdcg/dnspod-go)
+[![Build Status](https://github.com/nrdcg/dnspod-go/workflows/Main/badge.svg?branch=master)](https://github.com/nrdcg/dnspod-go/actions)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/nrdcg/dnspod-go)](https://pkg.go.dev/github.com/nrdcg/dnspod-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nrdcg/dnspod-go)](https://goreportcard.com/report/github.com/nrdcg/dnspod-go)
 
 A Go client for the [DNSPod API](https://www.dnspod.cn/docs/index.html).
