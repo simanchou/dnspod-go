@@ -1,6 +1,6 @@
-// Package dnspod implements a client for the dnspod API.
+// Package dnspod implements a client for the DNSPod API.
 //
-// In order to use this package you will need a dnspod account and your API Token.
+// In order to use this package you will need a DNSPod account and your API Token.
 package dnspod
 
 import (
@@ -22,8 +22,6 @@ const (
 	defaultTimeout   = 5
 	defaultKeepAlive = 30
 )
-
-// dnspod API docs: https://www.dnspod.cn/docs/info.html
 
 // CommonParams is the commons parameters.
 type CommonParams struct {
@@ -75,25 +73,25 @@ type Client struct {
 	// HTTP client used to communicate with the API.
 	HTTPClient *http.Client
 
-	// CommonParams used communicating with the dnspod API.
+	// CommonParams used communicating with the DNSPod API.
 	CommonParams CommonParams
 
 	// Base URL for API requests.
-	// Defaults to the public dnspod API, but can be set to a different endpoint (e.g. the sandbox).
+	// Defaults to the public DNSPod API, but can be set to a different endpoint (e.g. the sandbox).
 	// BaseURL should always be specified with a trailing slash.
 	BaseURL string
 
-	// User agent used when communicating with the dnspod API.
+	// User agent used when communicating with the DNSPod API.
 	UserAgent string
 
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
 
-	// Services used for talking to different parts of the dnspod API.
+	// Services used for talking to different parts of the DNSPod API.
 	Domains *DomainsService
 	Records *RecordsService
 }
 
-// NewClient returns a new dnspod API client.
+// NewClient returns a new DNSPod API client.
 func NewClient(params CommonParams) *Client {
 	timeout := defaultTimeout
 	if params.Timeout != 0 {

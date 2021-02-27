@@ -10,7 +10,7 @@ func setupClient() (*Client, *http.ServeMux, func()) {
 	mux := http.NewServeMux()
 	server := httptest.NewServer(mux)
 
-	params := CommonParams{LoginToken: "dnspod login token"}
+	params := CommonParams{LoginToken: "DNSPod login token"}
 
 	client := NewClient(params)
 	client.BaseURL = server.URL + "/"
@@ -21,7 +21,7 @@ func setupClient() (*Client, *http.ServeMux, func()) {
 }
 
 func TestNewClient(t *testing.T) {
-	params := CommonParams{LoginToken: "dnspod login token"}
+	params := CommonParams{LoginToken: "DNSPod login token"}
 
 	client := NewClient(params)
 
@@ -31,7 +31,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestNewRequest(t *testing.T) {
-	params := CommonParams{LoginToken: "dnspod login token"}
+	params := CommonParams{LoginToken: "DNSPod login token"}
 	client := NewClient(params)
 	client.BaseURL = "https://go.example.com/"
 

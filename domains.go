@@ -65,16 +65,20 @@ type domainWrapper struct {
 	Domain Domain     `json:"domain"`
 }
 
-// DomainsService handles communication with the domain related methods of the dnspod API.
+// DomainsService handles communication with the domain related methods of the DNSPod API.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/domains.html
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/domains.html
+// - https://docs.dnspod.com/api/
 type DomainsService struct {
 	client *Client
 }
 
 // List the domains.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/domains.html#domain-list
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/domains.html#domain-list
+// - https://docs.dnspod.com/api/5fe1b40a6e336701a2111f5b/
 func (s *DomainsService) List() ([]Domain, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 
@@ -94,7 +98,9 @@ func (s *DomainsService) List() ([]Domain, *Response, error) {
 
 // Create a new domain.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/domains.html#domain-create
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/domains.html#domain-create
+// - https://docs.dnspod.com/api/5fe1a9e36e336701a2111d3d/
 func (s *DomainsService) Create(domainAttributes Domain) (Domain, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Set("domain", domainAttributes.Name)
@@ -113,7 +119,9 @@ func (s *DomainsService) Create(domainAttributes Domain) (Domain, *Response, err
 
 // Get fetches a domain.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/domains.html#domain-info
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/domains.html#domain-info
+// - https://docs.dnspod.com/api/5fe1b37d6e336701a2111f2b/
 func (s *DomainsService) Get(id int) (Domain, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Set("domain_id", strconv.Itoa(id))
@@ -130,7 +138,9 @@ func (s *DomainsService) Get(id int) (Domain, *Response, error) {
 
 // Delete a domain.
 //
-// dnspod API docs: https://dnsapi.cn/Domain.Remove
+// DNSPod API docs:
+// - https://dnsapi.cn/Domain.Remove
+// - https://docs.dnspod.com/api/5fe1ac446e336701a2111dd1/
 func (s *DomainsService) Delete(id int) (*Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Set("domain_id", strconv.Itoa(id))

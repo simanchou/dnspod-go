@@ -46,14 +46,18 @@ type recordWrapper struct {
 
 // RecordsService handles communication with the DNS records related methods of the dnspod API.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/records.html
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/records.html
+// - https://docs.dnspod.com/api/
 type RecordsService struct {
 	client *Client
 }
 
 // List List the domain records.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/records.html#record-list
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/records.html#record-list
+// - https://docs.dnspod.com/api/5fe19a7a6e336701a2111bb9/
 func (s *RecordsService) List(domainID string, recordName string) ([]Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domainID)
@@ -77,7 +81,9 @@ func (s *RecordsService) List(domainID string, recordName string) ([]Record, *Re
 
 // Create Creates a domain record.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/records.html#record-create
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/records.html#record-create
+// - https://docs.dnspod.com/api/5fe19a3f6e336701a2111bb0/
 func (s *RecordsService) Create(domain string, recordAttributes Record) (Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
@@ -134,7 +140,9 @@ func (s *RecordsService) Create(domain string, recordAttributes Record) (Record,
 
 // Get Fetches the domain record.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/records.html#record-info
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/records.html#record-info
+// - https://docs.dnspod.com/api/5fe1a2a06e336701a2111bcd/
 func (s *RecordsService) Get(domain string, recordID string) (Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
@@ -156,7 +164,9 @@ func (s *RecordsService) Get(domain string, recordID string) (Record, *Response,
 
 // Update Updates a domain record.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/records.html#record-modify
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/records.html#record-modify
+// - https://docs.dnspod.com/api/5fe1a5a16e336701a2111c76/
 func (s *RecordsService) Update(domain string, recordID string, recordAttributes Record) (Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
@@ -214,7 +224,9 @@ func (s *RecordsService) Update(domain string, recordID string, recordAttributes
 
 // Delete Deletes a domain record.
 //
-// dnspod API docs: https://www.dnspod.cn/docs/records.html#record-remove
+// DNSPod API docs:
+// - https://www.dnspod.cn/docs/records.html#record-remove
+// - https://docs.dnspod.com/api/5fe1a4576e336701a2111c24/
 func (s *RecordsService) Delete(domain string, recordID string) (*Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
