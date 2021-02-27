@@ -1,0 +1,46 @@
+run:
+  deadline: 5m
+  skip-files: []
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  gocyclo:
+    min-complexity: 12
+  maligned:
+    suggest-new: true
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  misspell:
+    locale: US
+
+linters:
+  enable-all: true
+  disable:
+    - maligned
+    - interfacer
+    - lll
+    - dupl
+    - prealloc
+    - scopelint
+    - bodyclose
+    - wsl
+    - nlreturn
+    - stylecheck
+    - gomnd
+    - goerr113
+    - wrapcheck
+    - testpackage
+    - paralleltest
+    - tparallel
+    - noctx
+    - exhaustive
+    - exhaustivestruct
+    - cyclop
+    - ifshort
+
+issues:
+  exclude-use-default: false
+  max-per-linter: 0
+  max-same-issues: 0
