@@ -4,13 +4,13 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/nrdcg/dnspod-go)](https://pkg.go.dev/github.com/nrdcg/dnspod-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nrdcg/dnspod-go)](https://goreportcard.com/report/github.com/nrdcg/dnspod-go)
 
-A Go client for the [DNSPod API](https://www.dnspod.cn/docs/index.html).
+A Go client for the DNSPod API.
 
 Originally inspired by [dnsimple](https://github.com/weppos/dnsimple-go/dnsimple)
 
 ## Getting Started
 
-This library is a Go client you can use to interact with the [DNSPod API](https://www.dnspod.cn/docs/index.html).
+This library is a Go client you can use to interact with the DNSPod API.
 
 ```go
 package main
@@ -49,6 +49,12 @@ func main() {
 	fmt.Printf("Domain: %s\n (id: %d)", domain.Name, domain.ID)
 }
 ```
+
+## API documentation
+
+- https://www.dnspod.cn/docs/index.html
+- https://docs.dnspod.com/api-legacy/
+- https://docs.dnspod.com/api/
 
 ## License
 
