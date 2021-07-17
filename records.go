@@ -72,7 +72,7 @@ type RecordsService struct {
 // DNSPod API docs:
 // - https://www.dnspod.cn/docs/records.html#record-list
 // - https://docs.dnspod.com/api/5fe19a7a6e336701a2111bb9/
-func (s *RecordsService) List(domainID string, recordName string) ([]Record, *Response, error) {
+func (s *RecordsService) List(domainID, recordName string) ([]Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domainID)
 	if recordName != "" {
@@ -157,7 +157,7 @@ func (s *RecordsService) Create(domain string, recordAttributes Record) (Record,
 // DNSPod API docs:
 // - https://www.dnspod.cn/docs/records.html#record-info
 // - https://docs.dnspod.com/api/5fe1a2a06e336701a2111bcd/
-func (s *RecordsService) Get(domain string, recordID string) (Record, *Response, error) {
+func (s *RecordsService) Get(domain, recordID string) (Record, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
 	payload.Add("record_id", recordID)
@@ -181,7 +181,7 @@ func (s *RecordsService) Get(domain string, recordID string) (Record, *Response,
 // DNSPod API docs:
 // - https://www.dnspod.cn/docs/records.html#record-modify
 // - https://docs.dnspod.com/api/5fe1a5a16e336701a2111c76/
-func (s *RecordsService) Update(domain string, recordID string, recordAttributes Record) (RecordModify, *Response, error) {
+func (s *RecordsService) Update(domain, recordID string, recordAttributes Record) (RecordModify, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
 	payload.Add("record_id", recordID)
@@ -241,7 +241,7 @@ func (s *RecordsService) Update(domain string, recordID string, recordAttributes
 // DNSPod API docs:
 // - https://www.dnspod.cn/docs/records.html#record-remove
 // - https://docs.dnspod.com/api/5fe1a4576e336701a2111c24/
-func (s *RecordsService) Delete(domain string, recordID string) (*Response, error) {
+func (s *RecordsService) Delete(domain, recordID string) (*Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domain)
 	payload.Add("record_id", recordID)
