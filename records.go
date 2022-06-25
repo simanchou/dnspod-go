@@ -41,8 +41,9 @@ type RecordModify struct {
 	Status string      `json:"status,omitempty"`
 }
 
-type recordsWrapper struct {
+type DomainWithRecords struct {
 	Status  Status     `json:"status"`
+	Domain  Domain     `json:"domain"`
 	Info    DomainInfo `json:"info"`
 	Records []Record   `json:"records"`
 }
@@ -72,25 +73,25 @@ type RecordsService struct {
 // DNSPod API docs:
 // - https://www.dnspod.cn/docs/records.html#record-list
 // - https://docs.dnspod.com/api/5fe19a7a6e336701a2111bb9/
-func (s *RecordsService) List(domainID, recordName string) ([]Record, *Response, error) {
+func (s *RecordsService) List(domainID, recordName string) (*DomainWithRecords, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Add("domain_id", domainID)
 	if recordName != "" {
 		payload.Add("sub_domain", recordName)
 	}
 
-	wrappedRecords := recordsWrapper{}
+	wrappedRecords := &DomainWithRecords{}
 
-	res, err := s.client.post(methodRecordList, payload, &wrappedRecords)
+	res, err := s.client.post(methodRecordList, payload, wrappedRecords)
 	if err != nil {
 		return nil, res, err
 	}
 
 	if wrappedRecords.Status.Code != "1" {
-		return nil, nil, fmt.Errorf("could not get domains: %s", wrappedRecords.Status.Message)
+		return nil, nil, fmt.Errorf("code: %s, message: %s", wrappedRecords.Status.Code, wrappedRecords.Status.Message)
 	}
 
-	return wrappedRecords.Records, res, nil
+	return wrappedRecords, res, nil
 }
 
 // Create Creates a domain record.
@@ -146,7 +147,7 @@ func (s *RecordsService) Create(domain string, recordAttributes Record) (Record,
 	}
 
 	if returnedRecord.Status.Code != "1" {
-		return returnedRecord.Record, nil, fmt.Errorf("could not get domains: %s", returnedRecord.Status.Message)
+		return returnedRecord.Record, nil, fmt.Errorf("code: %s, message: %s", returnedRecord.Status.Code, returnedRecord.Status.Message)
 	}
 
 	return returnedRecord.Record, res, nil
@@ -170,7 +171,7 @@ func (s *RecordsService) Get(domain, recordID string) (Record, *Response, error)
 	}
 
 	if returnedRecord.Status.Code != "1" {
-		return returnedRecord.Record, nil, fmt.Errorf("could not get domains: %s", returnedRecord.Status.Message)
+		return returnedRecord.Record, nil, fmt.Errorf("code: %s, message: %s", returnedRecord.Status.Code, returnedRecord.Status.Message)
 	}
 
 	return returnedRecord.Record, res, nil
@@ -230,7 +231,7 @@ func (s *RecordsService) Update(domain, recordID string, recordAttributes Record
 	}
 
 	if returnedRecord.Status.Code != "1" {
-		return returnedRecord.Record, nil, fmt.Errorf("could not get domains: %s", returnedRecord.Status.Message)
+		return returnedRecord.Record, nil, fmt.Errorf("code: %s, message: %s", returnedRecord.Status.Code, returnedRecord.Status.Message)
 	}
 
 	return returnedRecord.Record, res, nil
@@ -241,10 +242,10 @@ func (s *RecordsService) Update(domain, recordID string, recordAttributes Record
 // DNSPod API docs:
 // - https://www.dnspod.cn/docs/records.html#record-remove
 // - https://docs.dnspod.com/api/5fe1a4576e336701a2111c24/
-func (s *RecordsService) Delete(domain, recordID string) (*Response, error) {
+func (s *RecordsService) Delete(domainId, recordId string) (*Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
-	payload.Add("domain_id", domain)
-	payload.Add("record_id", recordID)
+	payload.Add("domain_id", domainId)
+	payload.Add("record_id", recordId)
 
 	returnedRecord := recordWrapper{}
 
@@ -254,7 +255,7 @@ func (s *RecordsService) Delete(domain, recordID string) (*Response, error) {
 	}
 
 	if returnedRecord.Status.Code != "1" {
-		return nil, fmt.Errorf("could not get domains: %s", returnedRecord.Status.Message)
+		return nil, fmt.Errorf("code: %s, message: %s", returnedRecord.Status.Code, returnedRecord.Status.Message)
 	}
 
 	return res, nil
