@@ -53,6 +53,7 @@ type Domain struct {
 	CNameSpeedUp     string      `json:"cname_speedup,omitempty"`
 	Owner            string      `json:"owner,omitempty"`
 	AuthToAnquanBao  bool        `json:"auth_to_anquanbao,omitempty"`
+	NameServer       []string    `json:"dnspod_ns,omitempty"`
 }
 
 type domainListWrapper struct {
