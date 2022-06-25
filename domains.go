@@ -56,6 +56,13 @@ type Domain struct {
 	NameServer       []string    `json:"dnspod_ns,omitempty"`
 }
 
+type DomainCreateResp struct {
+	Id       string   `json:"id"`
+	Punycode string   `json:"punycode"`
+	Domain   string   `json:"domain"`
+	GradeNs  []string `json:"grade_ns"`
+}
+
 type domainListWrapper struct {
 	Status  Status     `json:"status"`
 	Info    DomainInfo `json:"info"`
@@ -66,6 +73,11 @@ type domainWrapper struct {
 	Status Status     `json:"status"`
 	Info   DomainInfo `json:"info"`
 	Domain Domain     `json:"domain"`
+}
+
+type domainCreateWrapper struct {
+	Status Status           `json:"status"`
+	Domain DomainCreateResp `json:"domain"`
 }
 
 // DomainsService handles communication with the domain related methods of the DNSPod API.
@@ -117,17 +129,21 @@ GETALLDOMAINS:
 // DNSPod API docs:
 // - https://www.dnspod.cn/docs/domains.html#domain-create
 // - https://docs.dnspod.com/api/5fe1a9e36e336701a2111d3d/
-func (s *DomainsService) Create(domainAttributes Domain) (Domain, *Response, error) {
+func (s *DomainsService) Create(domainAttributes Domain) (DomainCreateResp, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
 	payload.Set("domain", domainAttributes.Name)
 	payload.Set("group_id", domainAttributes.GroupID.String())
 	payload.Set("is_mark", domainAttributes.IsMark)
 
-	returnedDomain := domainWrapper{}
+	returnedDomain := domainCreateWrapper{}
 
 	res, err := s.client.post(methodDomainCreate, payload, &returnedDomain)
 	if err != nil {
-		return Domain{}, res, err
+		return DomainCreateResp{}, res, err
+	}
+
+	if returnedDomain.Status.Code != "1" {
+		return DomainCreateResp{}, nil, fmt.Errorf("code: %s,message: %s", returnedDomain.Status.Code, returnedDomain.Status.Message)
 	}
 
 	return returnedDomain.Domain, res, nil
