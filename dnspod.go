@@ -15,9 +15,10 @@ import (
 )
 
 const (
-	libraryVersion   = "0.4"
-	defaultBaseURL   = "https://dnsapi.cn/"
-	defaultUserAgent = "dnspod-go/" + libraryVersion
+	libraryVersion              = "0.5"
+	defaultBaseURL              = "https://dnsapi.cn/"
+	defaultBaseURLInternational = "https://api.dnspod.com/"
+	defaultUserAgent            = "dnspod-go/" + libraryVersion
 
 	defaultTimeout   = 5
 	defaultKeepAlive = 30
@@ -31,8 +32,9 @@ type CommonParams struct {
 	ErrorOnEmpty string
 	UserID       string
 
-	Timeout   int
-	KeepAlive int
+	IsInternational bool
+	Timeout         int
+	KeepAlive       int
 }
 
 func (c CommonParams) toPayLoad() url.Values {
@@ -89,6 +91,7 @@ type Client struct {
 	// Services used for talking to different parts of the DNSPod API.
 	Domains *DomainsService
 	Records *RecordsService
+	User    *UserService
 }
 
 // NewClient returns a new DNSPod API client.
@@ -112,11 +115,19 @@ func NewClient(params CommonParams) *Client {
 		},
 	}
 
-	client := &Client{HTTPClient: &httpClient, CommonParams: params, BaseURL: defaultBaseURL, UserAgent: defaultUserAgent}
+	var baseURL string
+	if params.IsInternational {
+		baseURL = defaultBaseURLInternational
+	} else {
+		baseURL = defaultBaseURL
+	}
+
+	client := &Client{HTTPClient: &httpClient, CommonParams: params, BaseURL: baseURL, UserAgent: defaultUserAgent}
 
 	client.common.client = client
 	client.Domains = (*DomainsService)(&client.common)
 	client.Records = (*RecordsService)(&client.common)
+	client.User = (*UserService)(&client.common)
 
 	return client
 }

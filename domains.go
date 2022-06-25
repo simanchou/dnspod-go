@@ -3,6 +3,7 @@ package dnspod
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -11,6 +12,7 @@ const (
 	methodDomainCreate = "Domain.Create"
 	methodDomainInfo   = "Domain.Info"
 	methodDomainRemove = "Domain.Remove"
+	methodRecordLine   = "Record.Line"
 )
 
 // DomainInfo handles domain information.
@@ -81,9 +83,13 @@ type DomainsService struct {
 // - https://docs.dnspod.com/api/5fe1b40a6e336701a2111f5b/
 func (s *DomainsService) List() ([]Domain, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
+	payload.Set("length", fmt.Sprintf("%d", 3000))
 
+	var all []Domain
+	times := 0
+GETALLDOMAINS:
+	payload.Set("offset", fmt.Sprintf("%d", times*3000))
 	returnedDomains := domainListWrapper{}
-
 	res, err := s.client.post(methodDomainList, payload, &returnedDomains)
 	if err != nil {
 		return nil, res, err
@@ -91,6 +97,15 @@ func (s *DomainsService) List() ([]Domain, *Response, error) {
 
 	if returnedDomains.Status.Code != "1" {
 		return nil, nil, fmt.Errorf("could not get domains: %s", returnedDomains.Status.Message)
+	}
+	all = append(all, returnedDomains.Domains...)
+	total, err := returnedDomains.Info.AllTotal.Int64()
+	if err != nil {
+		return nil, nil, err
+	}
+	if int64(len(all)) < total {
+		times++
+		goto GETALLDOMAINS
 	}
 
 	return returnedDomains.Domains, res, nil
@@ -148,4 +163,71 @@ func (s *DomainsService) Delete(id int) (*Response, error) {
 	returnedDomain := domainWrapper{}
 
 	return s.client.post(methodDomainRemove, payload, &returnedDomain)
+}
+
+type Line struct {
+	LineName string `json:"line_name"`
+	LineId   string `json:"line_id"`
+}
+
+type LineInfo struct {
+	Status  Status         `json:"status"`
+	LineIds map[string]any `json:"line_ids"`
+}
+
+// GetLines
+//
+// get lines of record which group by grade of domain
+// valid grade: D_Free,D_Plus,D_Extra,D_Expert,D_Ultra,DP_Free,DP_Plus,DP_Extra,DP_Expert,DP_Ultra
+func (s *DomainsService) GetLines(domain, domainGrade string) ([]Line, *Response, error) {
+	grade := []string{"D_Free", "D_Plus", "D_Extra", "D_Expert", "D_Ultra", "DP_Free", "DP_Plus", "DP_Extra", "DP_Expert", "DP_Ultra"}
+	ok := false
+	for _, i := range grade {
+		if i == domainGrade {
+			ok = true
+		}
+	}
+	if !ok {
+		return nil, nil, fmt.Errorf("invalid grade of domain: %s", domainGrade)
+	}
+
+	payload := s.client.CommonParams.toPayLoad()
+	if s.client.CommonParams.IsInternational {
+		if domain == "" {
+			return nil, nil, fmt.Errorf("domain must need when connect to internatinal version")
+		}
+		payload.Set("domain", domain)
+	}
+	payload.Set("domain_grade", domainGrade)
+
+	returnedLines := LineInfo{}
+
+	res, err := s.client.post(methodRecordLine, payload, &returnedLines)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if returnedLines.Status.Code != "1" {
+		return nil, nil, fmt.Errorf("code: %s, message: %s", returnedLines.Status.Code, returnedLines.Status.Message)
+	}
+
+	var items []Line
+	for k, v := range returnedLines.LineIds {
+		item := Line{LineName: k}
+
+		switch v.(type) {
+		case float64:
+			item.LineId = fmt.Sprintf("%d", int(v.(float64)))
+		case string:
+			item.LineId = v.(string)
+		}
+
+		items = append(items, item)
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].LineId < items[j].LineId
+	})
+
+	return items, res, nil
 }
