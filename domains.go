@@ -180,7 +180,11 @@ type LineInfo struct {
 // get lines of record which group by grade of domain
 // valid grade: D_Free,D_Plus,D_Extra,D_Expert,D_Ultra,DP_Free,DP_Plus,DP_Extra,DP_Expert,DP_Ultra
 func (s *DomainsService) GetLines(domain, domainGrade string) ([]Line, *Response, error) {
-	grade := []string{"D_Free", "D_Plus", "D_Extra", "D_Expert", "D_Ultra", "DP_Free", "DP_Plus", "DP_Extra", "DP_Expert", "DP_Ultra"}
+	grade := []string{
+		"D_Free", "D_Plus", "D_Extra", "D_Expert", "D_Ultra",
+		"DP_Free", "DP_Plus", "DP_Extra", "DP_Expert", "DP_Ultra",
+		"DPG_Free", "DPG_Plus", "DPG_Extra", "DPG_Expert", "DPG_Ultra",
+	}
 	ok := false
 	for _, i := range grade {
 		if i == domainGrade {
