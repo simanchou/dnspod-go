@@ -59,9 +59,5 @@ func (u *UserService) Profile() (UserInfo, *Response, error) {
 		return UserInfo{}, nil, fmt.Errorf("code: %s, message: %s", returnedUserInfo.Status.Code, returnedUserInfo.Status.Message)
 	}
 
-	if u.client.CommonParams.IsInternational && returnedUserInfo.Info.User.UserGrade == "" {
-		returnedUserInfo.Info.User.UserGrade = "DP_Free"
-	}
-
 	return returnedUserInfo.Info, res, nil
 }
