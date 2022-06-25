@@ -6,7 +6,7 @@
 
 A Go client for the DNSPod API.
 
-Originally inspired by [dnsimple](https://github.com/weppos/dnsimple-go/dnsimple)
+Originally inspired by [dnspod-go](https://github.com/nrdcg/dnspod-go)
 
 ## Getting Started
 
@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/nrdcg/dnspod-go"
+	"github.com/simanchou/dnspod-go"
 )
 
 func main() {
