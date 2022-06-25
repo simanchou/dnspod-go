@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strconv"
 )
 
 const (
@@ -173,13 +172,22 @@ func (s *DomainsService) Get(domainId string) (Domain, *Response, error) {
 // DNSPod API docs:
 // - https://dnsapi.cn/Domain.Remove
 // - https://docs.dnspod.com/api/5fe1ac446e336701a2111dd1/
-func (s *DomainsService) Delete(id int) (*Response, error) {
+func (s *DomainsService) Delete(domainId string) (*Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
-	payload.Set("domain_id", strconv.Itoa(id))
+	payload.Set("domain_id", domainId)
 
 	returnedDomain := domainWrapper{}
 
-	return s.client.post(methodDomainRemove, payload, &returnedDomain)
+	res, err := s.client.post(methodDomainRemove, payload, &returnedDomain)
+	if err != nil {
+		return nil, err
+	}
+
+	if returnedDomain.Status.Code != "1" {
+		return nil, fmt.Errorf("code: %s, message: %s", returnedDomain.Status.Code, returnedDomain.Status.Message)
+	}
+
+	return res, nil
 }
 
 type Line struct {
