@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 )
 
 const (
@@ -150,12 +151,19 @@ func (s *DomainsService) Create(domainAttributes Domain) (DomainCreateResp, *Res
 
 // Get fetches a domain.
 //
+// Parameter can be domain or domain id
+//
 // DNSPod API docs:
 // - https://www.dnspod.cn/docs/domains.html#domain-info
 // - https://docs.dnspod.com/api/5fe1b37d6e336701a2111f2b/
 func (s *DomainsService) Get(domainId string) (Domain, *Response, error) {
 	payload := s.client.CommonParams.toPayLoad()
-	payload.Set("domain_id", domainId)
+	if strings.Contains(domainId, ".") {
+		// must be domain if contain dot
+		payload.Set("domain", domainId)
+	} else {
+		payload.Set("domain_id", domainId)
+	}
 
 	returnedDomain := domainWrapper{}
 
