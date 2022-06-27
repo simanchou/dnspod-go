@@ -48,7 +48,7 @@ type Domain struct {
 	UserID           string      `json:"user_id,omitempty"`
 	CreatedOn        string      `json:"created_on,omitempty"`
 	UpdatedOn        string      `json:"updated_on,omitempty"`
-	TTL              string      `json:"ttl,omitempty"`
+	TTL              json.Number `json:"ttl,omitempty"`
 	CNameSpeedUp     string      `json:"cname_speedup,omitempty"`
 	Owner            string      `json:"owner,omitempty"`
 	AuthToAnquanBao  bool        `json:"auth_to_anquanbao,omitempty"`
