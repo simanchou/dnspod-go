@@ -54,6 +54,7 @@ type Domain struct {
 	Owner            string      `json:"owner,omitempty"`
 	AuthToAnquanBao  bool        `json:"auth_to_anquanbao,omitempty"`
 	NameServer       []string    `json:"dnspod_ns,omitempty"`
+	NS               []string    `json:"grade_ns,omitempty"`
 }
 
 type DomainCreateResp struct {
